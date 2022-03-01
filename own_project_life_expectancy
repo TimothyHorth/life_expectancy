@@ -1,0 +1,271 @@
+import pandas as pd
+import statistics
+
+df = pd.read_csv('human_life_expectancy.csv')
+
+# Print the table's general info
+# df.info()
+
+# Check table columns
+# print(df.columns)
+
+# Change table column names to snake_case
+df = df.rename( columns ={
+	'Country': 'country',
+	'Country_Code': 'country_code',
+	'Level': 'level',
+	'Region': 'region',
+	}
+)
+
+# Check table columns to ensure they've been correctly changed
+# print(df.columns)
+
+# Find data that is missing
+
+# print(df.isna().sum()) 	# No data is missing
+
+# See which countries contain the most rows of data.
+# data_by_country = df.groupby('region').count().sort_values(by='2019', ascending=False)
+
+# data_by_country = df[df['country'] == 'United States']
+# data_by_country = data_by_country[data_by_country['level'] == 'subnational'].reset_index(drop=False)
+# data_by_country = data_by_country[data_by_country['region'] == 'Ohio'].reset_index(drop=True)
+# print(data_by_country)
+
+#data_by_country = data_by_country[data_by_country.loc[:, '1990':'2019'] != 'Not Available']
+#data_by_country = data_by_country.loc[:, '1990':'2019'].dropna(axis=1)
+
+# 1. United States
+# 2. Nigeria
+# 3. India
+# 4. Colombia
+# 5. Mexico
+
+# Determine the minimum, maximum, median, and mean values for the data. Create functions for each descriptive statistic that can be called.
+
+# FIND COUNTRY DATA
+def country_data(data, country):
+	data_by_country = data[data['country'] == country]
+	data_by_country = data_by_country[data_by_country['level'] == 'National'].reset_index(drop=False)
+	data_by_country = data_by_country[data_by_country.loc[:, '1990':'2019'] != 'Not Available']
+	data_by_country = data_by_country.loc[:, '1990':'2019'].dropna(axis=1)
+	return data_by_country
+
+def region_data(data, country, region):
+	data_by_country = data[data['country'] == country]
+	data_by_country = data_by_country[data_by_country['region'] == region].reset_index(drop=True)
+	data_by_country = data_by_country[data_by_country.loc[:, '1990':'2019'] != 'Not Available']
+	data_by_country = data_by_country.loc[:, '1990':'2019'].dropna(axis=1)
+	return data_by_country
+
+def get_list_of_years(data, year1, year2):
+	# data_grouped_by_country = df.groupby('country').count().sort_values(by=year1, ascending=False)
+	values_row = data.loc[0, year1:year2]
+
+	# Create an empty list called 'values_list'
+	values_list = []
+
+	for value in values_row:
+		value = float(value)
+		values_list.append(value)
+
+	return values_list
+
+# FUNCTION TO CALL ALL STATISTICAL FUNCTIONS
+#def call_funcs():
+
+# MINIMUM
+def find_minimum(data):
+	return min(data)
+
+# MAXIMUM
+def find_maximum(data):
+	return max(data)
+
+# MEDIAN
+def find_median(data):
+	return statistics.median(data)
+
+# MEAN
+def find_mean(data):
+	return statistics.mean(data)
+
+# Print all statistical values
+def print_all_country(min_value, max_value, country, median_value, mean_value, first_year, last_year):
+	print(f'\nLIFE EXPECTANCY FOR {country.upper()} (in years) BETWEEN {first_year} - {last_year}: ')
+	print(f'Minimum: {min_value}')
+	print(f'Maximum: {max_value}')
+	print(f'Median: {median_value}')
+	print(f'Mean: {mean_value}\n')
+
+def print_all_region(min_value, max_value, region, median_value, mean_value, first_year, last_year):
+	print(f'\nLIFE EXPECTANCY FOR {region.upper()} (in years) BETWEEN {first_year} - {last_year}: ')
+	print(f'Minimum: {min_value}')
+	print(f'Maximum: {max_value}')
+	print(f'Median: {median_value}')
+	print(f'Mean: {mean_value}\n')
+
+# Enter in the country, beginning year, last year, and level (optional):
+
+# Create a list of countries that the country entry can be compared against
+
+countries_list = []
+for country in df.loc[:,'country'].unique():
+	countries_list.append(country)
+
+# Define while loop flag values and assing them values that will initially allow the while loops to run
+country = 'no country entered'
+region = 'no region entered'		# Defining/reseting region to a blank space each iteration before asking about region
+flag = True
+
+while country != 'Q' and country != 'n' and region != 'Q':
+
+# Create a while loop for obtaining a valid country entry
+
+	while flag == True:
+
+		country = input('\nPLEASE ENTER A COUNTRY \n(enter \'q\' to quit)\n(enter \'v\' to view countries):   ')
+		country = country.title().strip()
+
+		if country == 'V':
+			print('\n\n')
+			for elem in countries_list:
+				print(f'{elem}', end=', ')
+			print('\n\n')
+		elif country == 'Q':
+			flag = False
+			break
+
+		if country not in countries_list and country != 'Q' and country != 'V':
+			print('\nThe value you entered is not contained in the dataset! Please try another country.\n(enter \'q\' to quit)\n(enter \'v\' to view countries):   ')
+		elif country in countries_list:
+			ask_region = True
+			while ask_region = True:
+				region_yes = input('\nDo you want information by state?: (y/n)   ')
+
+				regional_info = False
+
+				if region_yes == 'y':
+					regional_info == True
+				elif region_yes != 'y' and region_yes != 'n':
+					print('Please enter \'y\', \'n\', or \'quit\':   ')
+					continue
+
+				# Create a while loop for asking about the state
+				while regional_info == True:
+				
+					if region_yes == 'y':
+
+						region_flag = True
+						while region_flag == True:
+							region = input('\nPLEASE ENTER A STATE\n(enter \'q\' to quit)\n(enter \'v\' to view states):   ')
+							region = region.title().strip()
+
+							region_list = []
+							df_region = df[df['country'] == country]
+							df_region = df_region[df_region['level'] == 'subnational'].reset_index(drop=False)
+							for region_li in df_region.loc[:,'region'].unique():
+								region_list.append(region_li)
+
+							if region == 'V':
+								print('\n\n')
+								for elem in region_list:
+									print(f'{elem}', end=', ')
+								print('\n\n')
+							elif region == 'Q':
+								region_flag = False
+								flag = False
+								break
+							elif region not in region_list and region != 'V' and region != 'Q':
+								print('\nThe value you entered is not contained in the dataset! Please try another region.\n(enter \'q\' to quit)\n(enter \'v\' to view countries):   ')
+								continue
+							else:
+								region_flag = False
+								break
+
+						if region == 'Q':
+							regional_info = False
+							break
+
+						#INSERT CODE HERE FOR REGION CODE
+
+					df_region = region_data(df, country, region)
+					min_year = df_region.columns[:].min()
+					max_year = df_region.columns[:].max()
+
+					first_year = input(f'\nPlease enter a lower bound year (>= {min_year}):   ')
+					first_year = first_year.strip()
+					last_year = input(f'\nPlease enter an upper bound year (<= {max_year}):   ')
+					last_year = last_year.strip()
+
+					new_data = get_list_of_years(df_region, first_year, last_year)
+					min_value = find_minimum(new_data)
+					max_value = find_maximum(new_data)
+					median_value = round(find_median(new_data), 2)
+					mean_value = round(find_mean(new_data), 2)
+
+					print_all_region(min_value, max_value, region, median_value, mean_value, first_year, last_year)	
+
+					regional_info = False
+
+
+				if region_yes == 'n':
+
+					#INSERT CODE HERE FOR NATIONAL CODE
+
+					# Grab the min and max years given in the country data
+	
+					# Creat function for this can call here and in the first function for the country data
+					df_country = country_data(df, country)
+					min_year = df_country.columns[:].min()
+					max_year = df_country.columns[:].max()
+
+					first_year = input(f'Please enter a lower bound year (>= {min_year}):   ')
+					first_year = first_year.strip()
+					last_year = input(f'Please enter an upper bound year (<= {max_year}):   ')
+					last_year = last_year.strip()
+
+					new_data = get_list_of_years(df_country, first_year, last_year)
+					min_value = find_minimum(new_data)
+					max_value = find_maximum(new_data)
+					median_value = round(find_median(new_data), 2)
+					mean_value = round(find_mean(new_data), 2)
+
+					print_all_country(min_value, max_value, country, median_value, mean_value, first_year, last_year)
+
+					regional_info = False
+
+				else:
+					print('Sorry, the value you entered wasn\'t an option. Please enter \'y\' or \'n\'. Would you like regional information?:   ')
+
+		if region == 'Q' or region_yes == 'n':
+			flag = False
+			break
+
+		contin = True
+
+		while contin == True:
+
+			continue_question_state = ''
+			continue_question_country = ''
+
+			if region_yes == 'y':
+				continue_question_state = input(f'Would you like to enter another state for {country}?: (y/n)   ')
+			else:
+				continue_question_country = input('Would you like to enter another country?: (y/n)  ')
+
+			if continue_question_state != '':
+				if continue_question_state == 'y':
+					print('hello')
+
+				elif continue_question_state == 'n':
+					print('sup')
+
+			if continue_question_country == 'y':
+				flag = True
+				contin = False
+			elif continue_question_country == 'n':
+				contin = False
+				flag = False
+				country = 'n'
